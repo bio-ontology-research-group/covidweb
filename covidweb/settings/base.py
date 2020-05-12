@@ -231,3 +231,10 @@ MESSAGE_TAGS = {
     messages.WARNING: 'list-group-item-warning',
     messages.ERROR: 'list-group-item-danger',
 }
+
+
+VIRTUOSO_HOST='ontolinator.kaust.edu.sa'
+VIRTUOSO_SPARQL_PORT=8891
+VIRTUOSO_USER='dba'
+VIRTUOSO_PWD='ABC'
+RDF_GRAPH_URI='https://workbench.cborg.cbrc.kaust.edu.sa'
