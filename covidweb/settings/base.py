@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'allauth.socialaccount.providers.orcid',
     'widget_tweaks',
     'rest_framework',
     'snowpenguin.django.recaptcha2',
@@ -214,6 +215,14 @@ RECAPTCHA_PUBLIC_KEY = '6LefajoUAAAAAOAWkZnaz-M2lgJOIR9OF5sylXmm'
 ACCOUNT_FORMS = {
     'login': 'accounts.forms.CaptchaLoginForm',
     'signup': 'accounts.forms.CaptchaSignupForm'}
+SOCIALACCOUNT_PROVIDERS = {
+    'orcid': {
+        # Base domain of the API. Default value: 'orcid.org', for the production API
+        'BASE_DOMAIN':'orcid.org',  # for the sandbox API
+        # Member API or Public API? Default: False (for the public API)
+        'MEMBER_API': False,  # for the member API
+    }
+}
 
 MESSAGE_TAGS = {
     messages.INFO: 'list-group-item-info',

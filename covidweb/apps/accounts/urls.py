@@ -9,5 +9,5 @@ urlpatterns = [
         ProfileDetailView.as_view()), name='profile'),
     path('profile/edit/', login_required(
         ProfileUpdateView.as_view()), name='profile_edit'),
-    path('', include('allauth.account.urls')),
+    path('', include('allauth.urls')),
 ]

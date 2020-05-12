@@ -1,0 +1,18 @@
+{% extends 'uploader/base.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="col-6">
+    {% if object.status == "submitted" %}
+    {{ object.status }}
+    {% elif object.status == "validated" %}
+    {{ object.status }}
+    {% elif object.status == "error" %}
+    {{ object.status }}
+    {{ object.error_message }}
+    {% elif object.status == "uploaded" %}
+    {{ object.status }}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
