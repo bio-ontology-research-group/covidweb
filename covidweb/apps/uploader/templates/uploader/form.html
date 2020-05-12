@@ -7,8 +7,34 @@
       enctype="multipart/form-data">
   {% csrf_token %}
   <div class="row">
+    <div class="col-6">
+        <h3>CBRC/BORG COVID-19 Sequence Database</h3>
+	<h4>Database for collecting COVID-19 sequence data from Saudi
+	  Arabia.</h4>
+	<p>
+	  Upload your SARS-CoV-2 sequence (FASTA or FASTQ formats)
+	  with metadata (in JSON-LD) to the CBRC/BORG COVID-19
+	  Sequence Database.  Each upload will be processed using a
+	  set
+	  of <a href="https://workbench.cborg.cbrc.kaust.edu.sa/projects/cborg-j7d0g-3yx09joxonkhbru#Workflows">standardized
+	  workflows</a> which generates a pangenome with associated
+	  metadata available for
+	  <a href="https://workbench.cborg.cbrc.kaust.edu.sa/projects/cborg-j7d0g-zcdm4l3ts28ioqo#Data_collections">download</a>. The
+	  pangenome and metadata can be loaded in a graph database and
+	  we make them available to
+	  be <a href="https://sparql.cbrc.kaust.edu.sa/XXXXXX">queried</a>.
+
+	  We provide a
+	  free <a href="https://github.com/bio-ontology-research-group/XXXXXX">command
+	  line tool</a> to support bulk uploads to the CBRC/BORG
+	  COVID-19 Sequence Database and other CBRC/BORG
+	  projects. <a href="https://cemse.kaust.edu.sa/borg/people">Contact
+	  us</a> to obtain a token for direct uploads.
+	</p>
+
+    </div>
+    <div class="col-6">
     {% for field in form.file_fields %}
-    <div class="col-5">
       <div class="form-group">
 	<label for="{{ field.auto_id }}">{{ field.label }}
 	  {% if field.field.required %}
@@ -23,11 +49,8 @@
 	  {{ field.errors.0 }}
 	</small>
       </div>
-    </div>
-    {% endfor %}
-    <div class="col-2 text-center">
-      <br/>
-      <button class="btn btn-primary w-100" type="submit">Submit</button>
+      {% endfor %}
+      <button class="btn btn-primary float-right" type="submit">Submit</button>
     </div>
   </div>
   <div class="row" id="metadata_fields">
