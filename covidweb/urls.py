@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('upload/', include('uploader.urls')),
+    path('isparql/', include('sparql.urls')),
     path('manage/', include('covidweb.manage_urls')),
     path('api/', include('covidweb.api_urls')),
     path('about/', TemplateView.as_view(template_name='about.html'), name='about'),

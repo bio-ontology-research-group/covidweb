@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'rest_framework',
     'snowpenguin.django.recaptcha2',
-    'uploader'
+    'uploader',
+    'sparql'
 ]
 
 MIDDLEWARE = [
