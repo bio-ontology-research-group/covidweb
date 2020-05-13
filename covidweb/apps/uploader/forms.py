@@ -1,18 +1,25 @@
 from django import forms
+from django.contrib.postgres.forms import SimpleArrayField
 from uploader.utils import FORM_ITEMS
 from uploader.models import Upload
 from uploader.qc_metadata import qc_metadata
+from uploader.qc_fasta import qc_fasta
 from django.forms import ValidationError
 from uploader.tasks import upload_to_arvados
+import tempfile
+import json
+import datetime
 
 
 def add_clean_field(cls, field_name):
     def required_field(self):
-        metadata_file = self.cleaned_data['metadata_file']
+        metadata_file = self.cleaned_data.get('metadata_file', None)
         value = self.cleaned_data[field_name]
         if metadata_file is not None:
             return value
-        raise ValidationError("This field is required!")
+        if not value:
+            raise ValidationError("This field is required!")
+        return value
     required_field.__doc__ = "Required field validator for %s" % field_name
     required_field.__name__ = "clean_%s" % field_name
     setattr(cls, required_field.__name__, required_field)
@@ -40,24 +47,50 @@ class UploadForm(forms.ModelForm):
             if item['required']:
                 label += ' *'
             if item['type'] == 'text':
-                self.fields[item['id']] = forms.CharField(
-                    max_length=255, label=label,
-                    help_text=help_text, required=False)
+                if not item['list']:
+                    self.fields[item['id']] = forms.CharField(
+                        max_length=255, label=label,
+                        help_text=help_text, required=False)
+                else:
+                    self.fields[item['id']] = SimpleArrayField(
+                        forms.CharField(
+                            max_length=255, required=False),
+                        label=label, help_text=help_text, required=False)
             elif item['type'] == 'select':
-                self.fields[item['id']] = forms.ChoiceField(
-                    label=label, help_text=help_text, required=False,
-                    choices=item['options'])
+                if not item['list']:
+                    self.fields[item['id']] = forms.ChoiceField(
+                        label=label, help_text=help_text, required=False,
+                        choices=item['options'])
+                else:
+                    self.fields[item['id']] = SimpleArrayField(
+                        forms.CharField(
+                            max_length=255, required=False),
+                        label=label, help_text=help_text, required=False,
+                        widget=forms.Select(choices=item['options']))
             elif item['type'] == 'number':
-                self.fields[item['id']] = forms.DecimalField(
-                    label=label, help_text=help_text, required=False)
+                if not item['list']:
+                    self.fields[item['id']] = forms.DecimalField(
+                        label=label, help_text=help_text, required=False)
+                else:
+                    self.fields[item['id']] = SimpleArrayField(
+                        forms.DecimalField(required=False),
+                        label=label, help_text=help_text, required=False)
             elif item['type'] == 'date':
-                self.fields[item['id']] = forms.DateField(
-                    label=label, input_formats=['%m/%d/%Y',],
-                    help_text=help_text, required=False)
-            self.fields[item['id']].is_list = item['list']
+                if not item['list']:
+                    self.fields[item['id']] = forms.DateField(
+                        label=label, input_formats=['%m/%d/%Y',],
+                        help_text=help_text, required=False)
+                else:
+                    self.fields[item['id']] = SimpleArrayField(
+                        forms.DateField(
+                            input_formats=['%m/%d/%Y',], required=False),
+                        label=label, help_text=help_text, required=False)
             if item['required']:
                 add_clean_field(UploadForm, item['id'])
 
+    def metadata_id(self):
+        return self['metadata.id']
+    
     def file_fields(self):
         return [self['sequence_file'], self['metadata_file']]
 
@@ -96,21 +129,58 @@ class UploadForm(forms.ModelForm):
     def clean_sequence_file(self):
         sequence_file = self.cleaned_data['sequence_file']
         try:
-            qc_fasta(sequence_file.temporary_file_path())
+            sf = open(sequence_file.temporary_file_path(), 'r')
+            qc_fasta(sf)
         except ValueError:
             raise ValidationError("Invalid file format")
         return sequence_file
+
+    def clean(self):
+        metadata = {}
+        for key, val in self.cleaned_data.items():
+            if not key.startswith('metadata') or not val:
+                continue
+            if isinstance(val, datetime.date):
+                val = val.strftime('%Y-%m-%d')
+            keys = key.split('.')
+            if len(keys) == 2:
+                metadata[keys[1]] = val
+            elif len(keys) == 3:
+                if keys[1] not in metadata:
+                    metadata[keys[1]] = {}
+                metadata[keys[1]][keys[2]] = val
+        metadata_str = json.dumps(metadata)
+        f = tempfile.NamedTemporaryFile('wt', delete=False)
+        f.write(metadata_str)
+        f.close()
+
+        if not qc_metadata(f.name):
+            os.remove(f.name)
+            raise ValidationError("Invalid metadata format")
+        self.cleaned_data['fields_metadata_file'] = f.name
+        return self.cleaned_data
+    
+
+    def save_file(self, f):
+        tmp_file = tempfile.NamedTemporaryFile(delete=False)
+        for chunk in f.chunks():
+            tmp_file.write(chunk)
+        tmp_file.close()
+        return tmp_file.name        
 
     def save(self):
         self.instance = super(UploadForm, self).save(commit=False)
         self.instance.user = self.request.user
         if not self.instance.id:
             self.instance.save()
-        sequence_file = self.cleaned_data['sequence_file']
+        sequence_file = self.save_file(self.cleaned_data['sequence_file'])
         metadata_file = self.cleaned_data['metadata_file']
         if metadata_file:
-            upload_to_arvados.delay(
-                self.instance.id,
-                sequence_file.temporary_file_path(),
-                metadata_file.temporary_file_path())
+            metadata_file = self.save_file(metadata_file)
+        else:
+            metadata_file = self.cleaned_data['fields_metadata_file']
+        upload_to_arvados.delay(
+            self.instance.id,
+            sequence_file,
+            metadata_file)
         return self.instance
