@@ -4,5 +4,6 @@ from uploader.views import *
 
 urlpatterns = [
     path('', UploadCreateView.as_view(), name='uploader-upload'),
-    path('view/<int:pk>', UploadDetailView.as_view(), name='uploader-view')
+    path('view/<int:pk>', UploadDetailView.as_view(), name='uploader-view'),
+    path('list', UploadListView.as_view(), name='uploader-list')
 ]

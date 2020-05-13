@@ -9,6 +9,7 @@ from uploader.tasks import upload_to_arvados
 import tempfile
 import json
 import datetime
+import os
 
 
 def add_clean_field(cls, field_name):
@@ -136,28 +137,29 @@ class UploadForm(forms.ModelForm):
         return sequence_file
 
     def clean(self):
-        metadata = {}
-        for key, val in self.cleaned_data.items():
-            if not key.startswith('metadata') or not val:
-                continue
-            if isinstance(val, datetime.date):
-                val = val.strftime('%Y-%m-%d')
-            keys = key.split('.')
-            if len(keys) == 2:
-                metadata[keys[1]] = val
-            elif len(keys) == 3:
-                if keys[1] not in metadata:
-                    metadata[keys[1]] = {}
-                metadata[keys[1]][keys[2]] = val
-        metadata_str = json.dumps(metadata)
-        f = tempfile.NamedTemporaryFile('wt', delete=False)
-        f.write(metadata_str)
-        f.close()
+        if not self.cleaned_data['metadata_file']:
+            metadata = {}
+            for key, val in self.cleaned_data.items():
+                if not key.startswith('metadata') or not val:
+                    continue
+                if isinstance(val, datetime.date):
+                    val = val.strftime('%Y-%m-%d')
+                keys = key.split('.')
+                if len(keys) == 2:
+                    metadata[keys[1]] = val
+                elif len(keys) == 3:
+                    if keys[1] not in metadata:
+                        metadata[keys[1]] = {}
+                    metadata[keys[1]][keys[2]] = val
+            metadata_str = json.dumps(metadata)
+            f = tempfile.NamedTemporaryFile('wt', delete=False)
+            f.write(metadata_str)
+            f.close()
 
-        if not qc_metadata(f.name):
-            os.remove(f.name)
-            raise ValidationError("Invalid metadata format")
-        self.cleaned_data['fields_metadata_file'] = f.name
+            if not qc_metadata(f.name):
+                os.remove(f.name)
+                raise ValidationError("Invalid metadata format")
+            self.cleaned_data['fields_metadata_file'] = f.name
         return self.cleaned_data
     
 

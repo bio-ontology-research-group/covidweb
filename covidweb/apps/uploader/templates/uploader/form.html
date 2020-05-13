@@ -31,7 +31,6 @@
 	  projects. <a href="mailto:borg.databases@kaust.edu.sa">Contact
 	  us</a> to obtain a token for direct uploads.
 	</p>
-
     </div>
     <div class="col-6">
     {% for field in form.file_fields %}
@@ -51,6 +50,13 @@
       </div>
       {% endfor %}
       <button class="btn btn-primary float-right" type="submit">Submit</button>
+      <p>
+	<ul>
+	  <li><a href="{% static "sequence.fasta" %}">Example Sequence</a></li>
+	  <li><a href="{% static "metadata.yaml" %}">Example
+	      Metadata</a></li>
+	</ul>
+      </p>
     </div>
   </div>
   <div class="row" id="metadata_fields">
