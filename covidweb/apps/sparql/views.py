@@ -2,6 +2,7 @@ import urllib
 import logging
 import requests
 
+from covidweb.apps.sparql.example import LIST_SUBMISSION_EXAMPLE
 from covidweb.apps.sparql.forms import SparqlForm
 from django.shortcuts import render 
 from django.conf import settings
@@ -19,7 +20,7 @@ SPARQL_ENDPOINT_URL = HTTP_PROT + VIRTUOSO_HOST + ":" + str(VIRTUOSO_SPARQL_PORT
 
 def sparql_form_view(request): 
 
-    context = {}
+    context = {'listSubmissionExample' : LIST_SUBMISSION_EXAMPLE}
     form = SparqlForm(request.GET or None) 
     context['form']= form 
     

@@ -1,8 +1,9 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
+from covidweb.apps.sparql.example import LIST_SUBMISSION_EXAMPLE
     
 class SparqlForm(forms.Form):
-    query = forms.CharField(label=_('Query'), widget=forms.Textarea)
+    query = forms.CharField(label=_('Query'), widget=forms.Textarea, initial=LIST_SUBMISSION_EXAMPLE)
     query.input = True
 
     options = [
@@ -31,3 +32,4 @@ class SparqlForm(forms.Form):
 
     def check(self):
         return filter(lambda x: x.input == False, self.fields.values())
+
