@@ -189,3 +189,26 @@ def generate_form(schema, options):
 METADATA_SCHEMA = yaml.safe_load(pkg_resources.resource_stream("uploader", "bh20seq-schema.yml"))
 METADATA_OPTION_DEFINITIONS = yaml.safe_load(pkg_resources.resource_stream("uploader", "bh20seq-options.yml"))
 FORM_ITEMS = generate_form(METADATA_SCHEMA, METADATA_OPTION_DEFINITIONS)
+PREFIX_MAP = {
+    'MainSchema': 'http://biohackathon.org/bh20-seq-schema#MainSchema/',
+    'hostSchema': 'http://biohackathon.org/bh20-seq-schema#hostSchema/',
+    'xsd': 'http://www.w3.org/2001/XMLSchema#',
+    'obo': 'http://purl.obolibrary.org/obo/',
+    'sio': 'http://semanticscience.org/resource/',
+    'efo': 'http://www.ebi.ac.uk/efo/>',
+    'evs': 'http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#',
+    'edam': 'http://edamontology.org/',
+    'wikidata': 'http://www.wikidata.org/entity/'
+}
+
+
+def to_prefixed_uri(val):
+    for key in PREFIX_MAP:
+        if isinstance(val, str) and PREFIX_MAP[key] in val:
+            return val.replace(PREFIX_MAP[key], key + ":")
+        
+        if isinstance(val, list):
+            for i in range(len(val)):
+                if PREFIX_MAP[key] in val[i]:
+                    val[i] = val[i].replace(PREFIX_MAP[key], key + ":")
+    return val
