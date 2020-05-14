@@ -1,9 +1,15 @@
+import urllib
+
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import CreateView, DetailView
+from django.core.paginator import InvalidPage, Paginator
+from django.http import Http404
+
 from uploader.forms import UploadForm
 from covidweb.mixins import FormRequestMixin
 from uploader.models import Upload
+from uploader.submissions import Submissions
 
 class UploadCreateView(FormRequestMixin, CreateView):
 
@@ -25,3 +31,34 @@ class UploadCreateView(FormRequestMixin, CreateView):
 class UploadDetailView(DetailView):
     model = Upload
     template_name = 'uploader/view.html'
+
+def submission_list_view(request):
+    service = Submissions()
+    submissions = service.find()
+    paginator = Paginator(submissions, 10, orphans=5)
+
+    is_paginated = True if paginator.num_pages > 1 else False
+    page = request.GET.get('page') or 1
+
+    try:
+        current_page = paginator.page(page)
+    except InvalidPage as e:
+        raise Http404(str(e))
+
+    context = {
+        'current_page': current_page,
+        'is_paginated': is_paginated,
+        'paginator': paginator
+    }
+
+    return render(request, 'uploader/list-submission.html', context)
+
+def submission_details_view(request, iri):
+    service = Submissions()
+    submission = service.get_by_iri(urllib.parse.unquote(iri))
+    context = { 'submission': submission }
+
+    return render(request, 'uploader/view-submission.html', context)
+
+
+

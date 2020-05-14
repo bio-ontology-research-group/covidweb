@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 HTTP_PROT = 'http://'
 VIRTUOSO_HOST = getattr(settings, 'VIRTUOSO_HOST')
 VIRTUOSO_SPARQL_PORT = getattr(settings, 'VIRTUOSO_SPARQL_PORT')
-SPARQL_ENDPOINT_URL = HTTP_PROT + VIRTUOSO_HOST + ":" + VIRTUOSO_SPARQL_PORT + "/sparql"
+SPARQL_ENDPOINT_URL = HTTP_PROT + VIRTUOSO_HOST + ":" + str(VIRTUOSO_SPARQL_PORT) + "/sparql"
 
 def execute_sparql(query, format):
     query_url="{endpoint}?query={query}&format={format}&timeout=0&debug=on&run={run}" \
