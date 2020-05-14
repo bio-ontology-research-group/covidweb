@@ -1,13 +1,17 @@
 import urllib
 import logging
 import requests
+import json
 
-from covidweb.apps.sparql.example import LIST_SUBMISSION_EXAMPLE
+from covidweb.apps.sparql.example import LIST_SUBMISSION_EXAMPLE, LIST_SARS_COV_SUBMISSION_EXAMPLE, GET_SUBMISSION_BY_URI_EXAMPLE
 from covidweb.apps.sparql.forms import SparqlForm
 from django.shortcuts import render 
 from django.conf import settings
 from django.shortcuts import redirect
 from django.http import HttpResponse
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 
 logger = logging.getLogger(__name__)
@@ -46,3 +50,18 @@ def sparql_view(request):
         return django_response
     else:
         return HttpResponse({'status': 'error', 'message': 'invalid form'})
+
+
+class SparqlExamples(APIView):
+
+    def get(self, request, format=None):
+        try:
+            examples = {
+                'listSubmission': LIST_SUBMISSION_EXAMPLE,
+                'listSarsCovSubmission': LIST_SARS_COV_SUBMISSION_EXAMPLE,
+                'getSubmissionByUri': GET_SUBMISSION_BY_URI_EXAMPLE
+            }
+            print("Here i am", examples)
+            return Response(json.dumps(examples))
+        except Exception as e:
+            logger.exception("message")

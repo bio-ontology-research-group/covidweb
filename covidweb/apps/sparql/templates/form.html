@@ -8,11 +8,13 @@
 <div class="card mb-4 wow fadeIn">
     <div class="card-body justify-content-between">
         <h4>SPARQL Query Editor</h4>
-        {% comment %} <div class="row"> 
+        <div class="row"> 
             <ul>
-                <li>List of submissions <button type="button" class="btn btn-link p-0 mb-1" onclick="listSubmissionExample()">example</button>. </li>
+                <li>List of submissions <button type="button" class="btn btn-link p-0 mb-1" id="listSubmissionExample">example</button>. </li>
+                <li>List submissions for SARS-CoV2 virus <button type="button" class="btn btn-link p-0 mb-1" id="listSarsCovSubmissions">example</button>. </li>
+                <li>Get submission details by submission URI <button type="button" class="btn btn-link p-0 mb-1" id="getSubmissionByUriExample">example</button>. </li>
             </ul>
-        </div> {% endcomment %}
+        </div>
         <form action="{% url 'sparql-endpoint' %}" method="get" target="_blank">
 
             {% regroup form by field.input as field_groups %}
@@ -49,12 +51,35 @@
 <script src="{% static "yarn/jquery/dist/jquery.min.js" %}"></script>
 <script type="text/javascript">
     $(document).ready(function(){
-         $('#reset').click(function(){
+        var example1 = ""
+        $('#reset').click(function(){
             $('textarea[name=query]').val('');
          });
+         $('#listSubmissionExample').click(function(){ 
+            $.get("/isparql/examples", function(data, status){
+                if (data) {
+                    var listSubmission = JSON.parse(data).listSubmission
+                    console.log(example1)
+                    $('textarea[name=query]').val(listSubmission);
+                }
+             }); 
+         });
+         $('#listSarsCovSubmissions').click(function(){ 
+            $.get("/isparql/examples", function(data, status){
+                if (data) {
+                    var listSarsCovSubmission = JSON.parse(data).listSarsCovSubmission
+                    $('textarea[name=query]').val(listSarsCovSubmission);
+                }
+             }); 
+         })
+         $('#getSubmissionByUriExample').click(function(){ 
+            $.get("/isparql/examples", function(data, status){
+                if (data) {
+                    var getSubmissionByUri = JSON.parse(data).getSubmissionByUri
+                    $('textarea[name=query]').val(getSubmissionByUri);
+                }
+             }); 
+         })
     });
-    {% comment %} function listSubmissionExample() {
-        var query = "{% autoescape off %}{{listSubmissionExample}}{% endautoescape %}"
-    } {% endcomment %}
 </script>
 {% endblock %}
