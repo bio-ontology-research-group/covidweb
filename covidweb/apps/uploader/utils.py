@@ -2,6 +2,9 @@ import pkg_resources
 import yaml
 import re
 import string
+import arvados
+
+api = arvados.api()
 
 def type_to_heading(type_name):
     """

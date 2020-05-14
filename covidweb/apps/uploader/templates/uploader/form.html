@@ -16,7 +16,7 @@
 	  with metadata (in JSON-LD) to the CBRC/BORG COVID-19
 	  Sequence Database.  Each upload will be processed using a
 	  set
-	  of <a href="https://workbench.cborg.cbrc.kaust.edu.sa/projects/cborg-j7d0g-3yx09joxonkhbru#Workflows">standardized
+	  of <a href="https://github.com/bio-ontology-research-group/borg-workflows">standardized
 	  workflows</a> which generates a pangenome with associated
 	  metadata available for
 	  <a href="https://workbench.cborg.cbrc.kaust.edu.sa/collections/cborg-4zz18-7hurjl2943atdoz">download</a>. The
@@ -28,10 +28,9 @@
 	  free <a href="https://github.com/bio-ontology-research-group/XXXXXX">command
 	  line tool</a> to support bulk uploads to the CBRC/BORG
 	  COVID-19 Sequence Database and other CBRC/BORG
-	  projects. <a href="mailto:borg-databases@kaust.edu.sa">Contact
+	  projects. <a href="mailto:borg.databases@kaust.edu.sa">Contact
 	  us</a> to obtain a token for direct uploads.
 	</p>
-
     </div>
     <div class="col-6">
     {% for field in form.file_fields %}
@@ -51,17 +50,35 @@
       </div>
       {% endfor %}
       <button class="btn btn-primary float-right" type="submit">Submit</button>
+      <p>
+	<ul>
+	  <li><a href="{% static "sequence.fasta" %}">Example Sequence</a></li>
+	  <li><a href="{% static "metadata.yaml" %}">Example
+	      Metadata</a></li>
+	</ul>
+      </p>
     </div>
   </div>
   <div class="row" id="metadata_fields">
+    <div class="col-3">
+      {% with form.metadata_id as field %}
+      <div class="form-group">
+	<label for="{{ field.auto_id }}">{{ field.label }}
+	  <a href="javascript:alert('{{ field.help_text }}')">?</a>
+	</label>
+        {{ field | add_class:"form-control" }}
+	<small class="text-danger">
+	  {{ field.errors.0 }}
+	</small>
+      </div>
+      {% endwith %}
+    </div>
+    <div class="col-9"></div>
     <div class="col-3">
       <h3>Host</h3>
       {% for field in form.host_fields %}
       <div class="form-group">
 	<label for="{{ field.auto_id }}">{{ field.label }}
-	  {% if field.field.required %}
-	  <span class="required">*</span>
-	  {% endif %}
 	  <a href="javascript:alert('{{ field.help_text }}')">?</a>
 	</label>
         {{ field | add_class:"form-control" }}
