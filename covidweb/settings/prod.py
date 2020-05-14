@@ -18,5 +18,10 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'uploader': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     },
 }

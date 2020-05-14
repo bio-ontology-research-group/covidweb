@@ -95,7 +95,7 @@ class Submissions:
         OPTIONAL { ?technology efo:EFO_0002699 ?sequence_assembly_method .} \n \
         OPTIONAL { ?technology obo:FLU_0000848 ?sequencing_coverage .} \n \
         }'
-        logger.debug("Executing query for search criteria")
+        logger.debug("Executing query for submission: %s", iri)
         submissions = virt.execute_sparql(query, self.MIME_TYPE_JSON).json()
         # appending submitter fields
         if len(submissions['results']['bindings']) > 0:
@@ -140,7 +140,7 @@ class Submissions:
         OPTIONAL { ?submitter sio:SIO_000115 ?submitter_orcid .} \n \
          \n \
         }'    
-        logger.debug("Executing query for search criteria")
+        logger.debug("Executing query for submission: %s", submission_iri)
         result = virt.execute_sparql(query, self.MIME_TYPE_JSON).json()
         return result['results']['bindings'][0] if len(result['results']['bindings']) > 0 else None
 
