@@ -212,3 +212,8 @@ def to_prefixed_uri(val):
                 if PREFIX_MAP[key] in val[i]:
                     val[i] = val[i].replace(PREFIX_MAP[key], key + ":")
     return val
+
+def fix_iri_path_param(iri):
+    iri = re.sub(r'(?!http:\/\/)(http:\/){1}', 'http://', iri)
+    iri = re.sub(r'(?!https:\/\/)(https:\/){1}', 'https://', iri)
+    return iri

@@ -12,6 +12,7 @@ from uploader.forms import UploadForm
 from covidweb.mixins import FormRequestMixin
 from uploader.models import Upload
 from uploader.utils import api
+from uploader.utils import fix_iri_path_param
 
 class UploadCreateView(FormRequestMixin, CreateView):
 
@@ -74,8 +75,9 @@ def submission_list_view(request):
     return render(request, 'uploader/list-submission.html', context)
 
 def submission_details_view(request, iri):
+    iri = fix_iri_path_param(iri)
     service = Submissions()
-    submission = service.get_by_iri(urllib.parse.unquote(iri))
+    submission = service.get_by_iri(iri)
     context = { 'submission': submission }
 
     return render(request, 'uploader/view-submission.html', context)
