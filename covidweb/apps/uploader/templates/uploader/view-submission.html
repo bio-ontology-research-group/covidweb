@@ -14,7 +14,11 @@
         </div>
         <div class="row pt-3">
             <div class="col-3">Virus Species</div>
-            <div class="col-6">{{submission.virus_species.value}}</div>
+            {% if submission.virus_species.display %}
+                <div class="col-6">{{submission.virus_species.display}}</div>
+            {% else %}
+                <div class="col-6">{{submission.virus_species.value}}</div>
+            {% endif %}
         </div>
         {% if 'virus_strain' in submission %}
         <div class="row pt-3">
@@ -27,7 +31,11 @@
         </div>
         <div class="row pt-3">
             <div class="col-3">Host Species</div>
-            <div class="col-3">{{submission.host_species.value}}</div>
+            {% if submission.host_species.display %}
+                <div class="col-3">{{submission.host_species.display}}</div>
+            {% else %}
+                <div class="col-3">{{submission.host_species.value}}</div>
+            {% endif %}
         </div>
         {% if 'host_id' in submission %}
         <div class="row pt-3">
@@ -38,19 +46,34 @@
         {% if 'host_sex' in submission %}
         <div class="row pt-3">
             <div class="col-3">Host Sex</div>
-            <div class="col-3">{{submission.host_sex.value}}</div>
+            {% if submission.host_sex.display %}
+                <div class="col-6">{{submission.host_sex.display}}</div>
+            {% else %}
+                <div class="col-6">{{submission.host_sex.value}}</div>
+            {% endif %}
         </div>
         {% endif %}
         {% if 'host_age' in submission %}
         <div class="row pt-3">
             <div class="col-3">Host Age</div>
-            <div class="col-3">{{submission.host_age.value}} {{submission.host_age_unit.value}}</div>
+            <div class="col-3">{{submission.host_age.value}} 
+            {% if submission.host_age_unit.display %}
+                {{submission.host_age_unit.display}}
+            {% else %}
+                {{submission.host_age_unit.value}}
+            {% endif %}
+            </div>
         </div>
         {% endif %}
         {% if 'host_health_status' in submission %}
         <div class="row pt-3">
             <div class="col-3">Host Health Status</div>
-            <div class="col-3">{{submission.host_health_status.value}}</div>
+            <div class="col-3">
+            {% if submission.host_health_status.display %}
+                {{submission.host_health_status.display}}
+            {% else %}
+                {{submission.host_health_status.value}}
+            {% endif %}</div>
         </div>
         {% endif %}
         {% if 'host_treatment' in submission %}
@@ -71,7 +94,12 @@
         {% if 'ethnicity' in submission %}
         <div class="row pt-3">
             <div class="col-3">Host Ethnicity</div>
-            <div class="col-3">{{submission.ethnicity.value}}</div>
+            <div class="col-3">
+            {% if submission.ethnicity.display %}
+                {{submission.ethnicity.display}}
+            {% else %}
+                {{submission.ethnicity.value}}
+            {% endif %}</div>
         </div>
         {% endif %}
         <div class="row mt-2 border-bottom">
@@ -89,7 +117,7 @@
         <div class="row pt-3">
             <div class="col-3">Specimen Source</div>
             <div class="col-3">
-                <ul class="list-unstyled">{% for source in  submission.specimen_sources.value %}
+                <ul class="list-unstyled">{% for source in  submission.specimen_sources.display %}
                     <li>{{source}} </li>
                 {% endfor %}</ul></div>
         </div>
@@ -132,8 +160,8 @@
         </div>
         <div class="row pt-3">
             <div class="col-3">Sequencing Technologies</div>
-            <div class="col-3">
-                <ul class="list-unstyled">{% for tech in  submission.seq_technologies.value %}
+            <div class="col-6">
+                <ul class="list-unstyled">{% for tech in  submission.seq_technologies.display %}
                     <li>{{tech}} </li>
                 {% endfor %}</ul></div>
         </div>

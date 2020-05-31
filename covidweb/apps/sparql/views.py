@@ -61,7 +61,6 @@ class SparqlExamples(APIView):
                 'listSarsCovSubmission': LIST_SARS_COV_SUBMISSION_EXAMPLE,
                 'getSubmissionByUri': GET_SUBMISSION_BY_URI_EXAMPLE
             }
-            print("Here i am", examples)
             return Response(json.dumps(examples))
         except Exception as e:
             logger.exception("message")

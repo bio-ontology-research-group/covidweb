@@ -189,6 +189,18 @@ def generate_form(schema, options):
 METADATA_SCHEMA = yaml.safe_load(pkg_resources.resource_stream("uploader", "bh20seq-schema.yml"))
 METADATA_OPTION_DEFINITIONS = yaml.safe_load(pkg_resources.resource_stream("uploader", "bh20seq-options.yml"))
 FORM_ITEMS = generate_form(METADATA_SCHEMA, METADATA_OPTION_DEFINITIONS)
+ONT_TO_URI_PATTERN_MAP = {
+    'NCBITAXON': 'http://purl.obolibrary.org/obo/NCBITaxon_',
+    'HANCESTRO': 'http://purl.obolibrary.org/obo/HANCESTRO_',
+    'UO': 'http://purl.obolibrary.org/obo/UO_',
+    'PATO': 'http://purl.obolibrary.org/obo/PATO_',
+    'NCIT': 'http://purl.obolibrary.org/obo/NCIT_',
+    'GENEPIO': 'http://purl.obolibrary.org/obo/GENEPIO_',
+    'OBI': 'http://purl.obolibrary.org/obo/OBI_',
+    'EFO': 'http://www.ebi.ac.uk/efo/EFO_'
+}
+
+
 PREFIX_MAP = {
     'MainSchema': 'http://biohackathon.org/bh20-seq-schema#MainSchema/',
     'hostSchema': 'http://biohackathon.org/bh20-seq-schema#hostSchema/',
@@ -201,17 +213,32 @@ PREFIX_MAP = {
     'wikidata': 'http://www.wikidata.org/entity/'
 }
 
-
 def to_prefixed_uri(val):
     for key in PREFIX_MAP:
         if isinstance(val, str) and PREFIX_MAP[key] in val:
             return val.replace(PREFIX_MAP[key], key + ":")
         
         if isinstance(val, list):
+            prefixed_val = []
             for i in range(len(val)):
                 if PREFIX_MAP[key] in val[i]:
-                    val[i] = val[i].replace(PREFIX_MAP[key], key + ":")
+                    prefixed_val.append(val[i].replace(PREFIX_MAP[key], key + ":"))
+                else:
+                    prefixed_val.append(val[i])
+            return prefixed_val
     return val
+
+def get_ontology(val):
+    ont_list =[]
+    for key in ONT_TO_URI_PATTERN_MAP:
+        if isinstance(val, str) and ONT_TO_URI_PATTERN_MAP[key] in val:
+            return [{'iri': val, 'ontology': key}]
+
+        if isinstance(val, list):
+            for i in range(len(val)):
+                if ONT_TO_URI_PATTERN_MAP[key] in val[i]:
+                    ont_list.append({'iri': val[i], 'ontology': key})
+    return ont_list
 
 def fix_iri_path_param(iri):
     iri = re.sub(r'(?!http:\/\/)(http:\/){1}', 'http://', iri)

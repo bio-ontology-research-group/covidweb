@@ -1,7 +1,8 @@
 import covidweb.virtuoso as virt
 import logging
 
-from uploader.utils import to_prefixed_uri
+from uploader.utils import to_prefixed_uri, get_ontology
+from uploader.aberowl import find_by_iri
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +148,34 @@ class Submissions:
     def transform_references(self, submissions):
         for obj in submissions['results']['bindings']:
             for key in obj:
-                obj[key]['value'] = to_prefixed_uri(obj[key]['value'])
+                obj[key]['prefixed_value'] = to_prefixed_uri(obj[key]['value'])
+        return submissions
+
+    def resolve_references(self, submissions):
+        iri_dict = []
+        group_uri_keys = ['seq_technologies', 'specimen_sources']
+        for obj in submissions:
+            for key in obj:
+                if obj[key]['type'] == 'uri' or key in group_uri_keys:
+                    iri_dict = iri_dict + get_ontology(obj[key]['value'])
+
+        resolved_objs = find_by_iri(iri_dict)
+        for obj in submissions:
+            for key in obj:
+                if obj[key]['type'] == 'uri' and isinstance(obj[key]['value'], str) and obj[key]['value'] in resolved_objs:
+                   obj[key]['display'] = resolved_objs[obj[key]['value']]['label']
+                
+                if key in group_uri_keys and isinstance(obj[key]['value'], list):
+                    val_list = []
+                    val = obj[key]['value']   
+                    for i in range(len(val)):
+                        if val[i] in resolved_objs:
+                            val_list.append(resolved_objs[val[i]]['label'])
+                        else:
+                            val_list.append(val[i])
+                        
+                    obj[key]['display'] = val_list
+        
         return submissions
 
     def pipe_sep_to_string_list(self, submissions):

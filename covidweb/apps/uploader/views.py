@@ -63,6 +63,8 @@ def submission_list_view(request):
 
     try:
         current_page = paginator.page(page)
+        current_page = service.resolve_references(current_page)
+
     except InvalidPage as e:
         raise Http404(str(e))
 
@@ -78,6 +80,8 @@ def submission_details_view(request, iri):
     iri = fix_iri_path_param(iri)
     service = Submissions()
     submission = service.get_by_iri(iri)
+    submission = service.resolve_references([submission])[0]
+
     context = { 'submission': submission }
 
     return render(request, 'uploader/view-submission.html', context)

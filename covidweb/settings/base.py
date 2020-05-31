@@ -239,3 +239,5 @@ VIRTUOSO_SPARQL_PORT=8891
 VIRTUOSO_USER='dba'
 VIRTUOSO_PWD='ABC'
 RDF_GRAPH_URI='https://workbench.cborg.cbrc.kaust.edu.sa'
+
+ABEROWL_API_URL='http://aber-owl.net/api'

@@ -18,16 +18,24 @@
             </thead>
             <tbody>
                {% for sub in  current_page %}
-                <tr>
-                    <th>{{sub.host_species.value}}</th>
+                <tr> 
+                    {% if sub.host_species.display %}
+                        <th>{{sub.host_species.display}}</th>
+                    {% else %}
+                        <th>{{sub.host_species.prefixed_value}}</th>
+                    {% endif %}
                     <th>{{sub.sample_id.value}}</th>
                     <th>{{sub.collection_date.value}}</th>
                     <th>
-                        {% for tech in  sub.seq_technologies.value %}
-                            {{tech}} 
+                        {% for tech in  sub.seq_technologies.display %}
+                            {{tech}}, <br />
                         {% endfor %}
                     </th>
-                    <th>{{sub.virus_species.value}}</th>
+                    {% if sub.virus_species.display %}
+                        <th>{{sub.virus_species.display}}</th>
+                    {% else %}
+                        <th>{{sub.virus_species.prefixed_value}}</th>
+                    {% endif %}
                     <th><a href="{% url 'uploader-submission_details' iri=sub.sub.value %}" class="btn btn-primary">View
                     </a></th>
                 </tr>
