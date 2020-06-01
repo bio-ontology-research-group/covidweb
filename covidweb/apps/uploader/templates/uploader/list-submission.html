@@ -26,17 +26,19 @@
                     {% endif %}
                     <th>{{sub.sample_id.value}}</th>
                     <th>{{sub.collection_date.value}}</th>
-                    <th>
+                    <th><ul class="list-unstyled">
                         {% for tech in  sub.seq_technologies.display %}
-                            {{tech}}, <br />
+                            <li>{{tech}}</li>
                         {% endfor %}
-                    </th>
+                    </ul></th>
                     {% if sub.virus_species.display %}
                         <th>{{sub.virus_species.display}}</th>
                     {% else %}
                         <th>{{sub.virus_species.prefixed_value}}</th>
                     {% endif %}
-                    <th><a href="{% url 'uploader-submission_details' iri=sub.sub.value %}" class="btn btn-primary">View
+                    <th><a href="{% url 'uploader-submission_details' iri=sub.sub.value %}" class="btn btn-link" 
+                        data-toggle="tooltip" data-placement="bottom" title="View Details"> 
+                       <i class="fa fa-eye"></i>
                     </a></th>
                 </tr>
                 {% endfor %}
@@ -78,4 +80,12 @@
         </nav>
         {% endif %}
     </div>
+
+<script src="{% static "yarn/jquery/dist/jquery.min.js" %}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();   
+});
+</script>
+</script>
 {% endblock content %}
