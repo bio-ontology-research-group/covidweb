@@ -21,6 +21,7 @@
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
     <!-- Custom styles for this template -->
     <link href="{% static "css/app.css" %}" rel="stylesheet">
+    <link href="{% static "css/doc-theme.css" %}" rel="stylesheet">
 
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
@@ -38,10 +39,8 @@
     {% block navigation %}
       {% include "header.html" %}
     {% endblock %}
-    <div class="container">
     {% block content %}
     {% endblock %}
-    </div>
     {% block footer %}
     <footer class="footer bg-light">
       <div class="container">
