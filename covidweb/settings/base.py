@@ -12,8 +12,23 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import sys
+import shutil
+import configparser
+
 from kombu import Exchange, Queue
 from django.contrib import messages
+
+# Reading setup properties from configuration file
+config_dir = os.path.expanduser("~") + "/.config"
+configFile = config_dir + "/covidweb.ini"
+
+if not os.path.isfile(configFile):
+    os.makedirs(config_dir, exist_ok=True)
+    shutil.copyfile("default_covidweb.ini", configFile)
+
+config = configparser.RawConfigParser()
+config.read(configFile)
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -237,12 +252,11 @@ MESSAGE_TAGS = {
     messages.ERROR: 'list-group-item-danger',
 }
 
-
-VIRTUOSO_HOST='10.254.146.165'
-VIRTUOSO_SPARQL_PORT=8891
-VIRTUOSO_USER='dba'
-VIRTUOSO_PWD='ABC'
-RDF_GRAPH_URI='https://workbench.cborg.cbrc.kaust.edu.sa'
+VIRTUOSO_HOST=config['virtuoso']['host']
+VIRTUOSO_SPARQL_PORT=config['virtuoso']['sparql.port']
+VIRTUOSO_USER=config['virtuoso']['user']
+VIRTUOSO_PWD=config['virtuoso']['pwd']
+RDF_GRAPH_URI=config['virtuoso']['graph']
 
 ABEROWL_API_URL='http://aber-owl.net/api'
 
@@ -273,4 +287,11 @@ LOGGING = {
     },
 }
 
+PANGENOME_RESULT_UUID=config['arvados']['api.pangenome.result.uuid']
+
 ARVADOS_COL_BASE_URI='https://workbench.cborg.cbrc.kaust.edu.sa/collections/'
+
+GALAXY_API_BASEURL=config['galaxy']['api.base_url']
+GALAXY_API_KEY=config['galaxy']['api.key']
+GALAXY_PANGENOME_RESULT_DIR=config['galaxy']['pangenome_result_dir']
+LIBRARY_ID= config['galaxy']['api.library.id']
