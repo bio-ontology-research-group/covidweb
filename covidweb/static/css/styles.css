@@ -312,3 +312,15 @@ section .section-title {
 	cursor:pointer;
 	padding: 0px 2px 0 2px;
 }
+
+.pagination .active .item {
+	position: relative;
+	display: block;
+	padding: .5rem .75rem;
+	margin-left: -1px;
+	line-height: 1.25;
+	color: #78797b;
+	background-color: #fff;
+	border: 1px solid #dee2e6;
+	
+  }

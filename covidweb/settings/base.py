@@ -258,7 +258,7 @@ VIRTUOSO_USER=config['virtuoso']['user']
 VIRTUOSO_PWD=config['virtuoso']['pwd']
 RDF_GRAPH_URI=config['virtuoso']['graph']
 
-ABEROWL_API_URL='http://aber-owl.net/api'
+ABEROWL_API_URL='http://10.254.147.137/api'
 
 LOGGING = {
     'version': 1,
