@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 class Submissions:
     MIME_TYPE_JSON = "application/json"
 
-    def find(self):
+    def find(self, limit=10, offset=None):
+        offsetstr = " OFFSET " + str(offset) if offset else ''
         query = 'PREFIX MainSchema: <http://biohackathon.org/bh20-seq-schema#MainSchema/> \n \
         PREFIX sio: <http://semanticscience.org/resource/> \n \
         PREFIX efo: <http://www.ebi.ac.uk/efo/> \n \
@@ -17,34 +18,44 @@ class Submissions:
         PREFIX evs: <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> \n \
         PREFIX edam: <http://edamontology.org/> \n \
         \n \
-        select distinct ?sub ?host_species ?sample_id  ?collection_date  \n \
-            (group_concat(distinct ?author;separator="|") as ?authors)  \n \
-            (group_concat(distinct ?seq_technology;separator="|") as ?seq_technologies)  \n \
-            ?virus_species \n \
-        from <https://workbench.cborg.cbrc.kaust.edu.sa>  \n \
-        \n \
+        select * \n \
         where { \n \
         \n \
-        ?sub MainSchema:host  ?host ; \n \
-            MainSchema:sample ?sample ; \n \
-            MainSchema:submitter ?submitter ; \n \
-            MainSchema:technology ?technology ; \n \
-            MainSchema:virus ?virus . \n \
-        \n \
-        ?host efo:EFO_0000532 ?host_species . \n \
-        \n \
-        ?sample sio:SIO_000115 ?sample_id; \n \
-            evs:C25164 ?collection_date . \n \
-        \n \
-        ?virus edam:data_1875 ?virus_species . \n \
-        ?technology obo:OBI_0600047 ?seq_technology . \n \
-        ?submitter obo:NCIT_C42781 ?author .  \n \
-        }'
+        { \n \
+            select distinct ?sub ?host_species ?sample_id  ?collection_date  \n \
+                (group_concat(distinct ?seq_technology;separator="|") as ?seq_technologies)  \n \
+                ?virus_species \n \
+            from <https://workbench.cborg.cbrc.kaust.edu.sa>  \n \
+            \n \
+            where { \n \
+            \n \
+            ?sub MainSchema:host  ?host ; \n \
+                MainSchema:sample ?sample ; \n \
+                MainSchema:submitter ?submitter ; \n \
+                MainSchema:technology ?technology ; \n \
+                MainSchema:virus ?virus . \n \
+            \n \
+            ?host efo:EFO_0000532 ?host_species . \n \
+            \n \
+            ?sample sio:SIO_000115 ?sample_id; \n \
+                evs:C25164 ?collection_date . \n \
+            \n \
+            ?virus edam:data_1875 ?virus_species . \n \
+            ?technology obo:OBI_0600047 ?seq_technology . \n \
+            ?submitter obo:NCIT_C42781 ?author .  \n \
+            } LIMIT ' + str(limit) + offsetstr + ' \n \
+        } UNION { \n \
+            select (count(distinct ?sub) as ?total)  \n \
+            FROM <https://workbench.cborg.cbrc.kaust.edu.sa> \n \
+            where { \n \
+                ?sub MainSchema:host  ?host . \n \
+        \n  }\n} \n}'
         logger.debug("Executing query for search criteria")
         result = virt.execute_sparql(query, self.MIME_TYPE_JSON).json()
-        submissions = self.pipe_sep_to_string_list(result)
+        submissions = self.pipe_sep_to_string_list(result['results']['bindings'][:-1])
         submissions = self.transform_references(submissions)
-        return submissions['results']['bindings']
+        submissions.append(result['results']['bindings'][-1])
+        return submissions
 
     def get_by_iri(self, iri):
         query = 'PREFIX MainSchema: <http://biohackathon.org/bh20-seq-schema#MainSchema/> \n \
@@ -97,21 +108,22 @@ class Submissions:
         OPTIONAL { ?technology obo:FLU_0000848 ?sequencing_coverage .} \n \
         }'
         logger.debug("Executing query for submission: %s", iri)
-        submissions = virt.execute_sparql(query, self.MIME_TYPE_JSON).json()
+        result = virt.execute_sparql(query, self.MIME_TYPE_JSON).json()
+        submissions = result['results']['bindings']
         # appending submitter fields
-        if len(submissions['results']['bindings']) > 0:
+        if len(submissions) > 0:
             submitter = self.get_submitter(iri)
             if not submitter:
                 submissions = self.pipe_sep_to_string_list(submissions)
                 submissions = self.transform_references(submissions)
-                return submissions['results']['bindings'][0]
+                return submissions[0]
 
             for key in submitter:
-                submissions['results']['bindings'][0][key] = submitter[key]
+                submissions[0][key] = submitter[key]
             
             submissions = self.pipe_sep_to_string_list(submissions)
             submissions = self.transform_references(submissions)
-            return submissions['results']['bindings'][0]
+            return submissions[0]
         else:
             return None
 
@@ -146,7 +158,7 @@ class Submissions:
         return result['results']['bindings'][0] if len(result['results']['bindings']) > 0 else None
 
     def transform_references(self, submissions):
-        for obj in submissions['results']['bindings']:
+        for obj in submissions:
             for key in obj:
                 obj[key]['prefixed_value'] = to_prefixed_uri(obj[key]['value'])
         return submissions
@@ -179,9 +191,11 @@ class Submissions:
         return submissions
 
     def pipe_sep_to_string_list(self, submissions):
-        for obj in submissions['results']['bindings']:
-            obj['authors']['value'] = obj['authors']['value'].split('|')
+        for obj in submissions:
             obj['seq_technologies']['value'] = obj['seq_technologies']['value'].split('|') 
+            if 'authors' in obj:
+                obj['authors']['value'] = obj['authors']['value'].split('|')
+
             if 'submitter_names' in obj:
                 obj['submitter_names']['value'] = obj['submitter_names']['value'].split('|')
             

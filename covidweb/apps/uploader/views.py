@@ -1,19 +1,29 @@
 import urllib
+import logging
 
 from django.shortcuts import render
 from django.urls import reverse
 from django.core.paginator import InvalidPage, Paginator
 from django.http import Http404
+from django.conf import settings
 
 from uploader.submissions import Submissions
 
 from django.views.generic import CreateView, DetailView, ListView
 from uploader.forms import UploadForm
 from covidweb.mixins import FormRequestMixin
+from covidweb.virtuoso import insert
 from uploader.models import Upload
 from uploader.utils import api
 from uploader.utils import fix_iri_path_param
 
+from rdflib import Graph
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+
+logger = logging.getLogger(__name__)
 class UploadCreateView(FormRequestMixin, CreateView):
 
     model = Upload
@@ -55,14 +65,24 @@ class UploadListView(ListView):
 
 def submission_list_view(request):
     service = Submissions()
-    submissions = service.find()
-    paginator = Paginator(submissions, 10, orphans=5)
 
-    is_paginated = True if paginator.num_pages > 1 else False
     page = request.GET.get('page') or 1
+    page = int(page)
 
     try:
-        current_page = paginator.page(page)
+        pageSize = 20
+        offset = 1
+        if page > 1:
+            offset = pageSize * (page - 1)
+
+        submissions = service.find(limit=pageSize, offset=offset)
+        current_page = submissions[:-1]
+        num_pages = int((int(submissions[-1]['total']['value']) / pageSize)+ 1)
+        has_next = True if num_pages > page else False
+        has_previous = True if 1 < page else False
+        next_page_number = page + 1
+        previous_page_number = page - 1
+        page_range = range(1,num_pages + 1)
         current_page = service.resolve_references(current_page)
 
     except InvalidPage as e:
@@ -70,10 +90,14 @@ def submission_list_view(request):
 
     context = {
         'current_page': current_page,
-        'is_paginated': is_paginated,
-        'paginator': paginator
+        'number': page,
+        'num_pages': num_pages,
+        'has_next': has_next,
+        'has_previous': has_previous,
+        'previous_page_number': previous_page_number,
+        'next_page_number': next_page_number,
+        'page_range': page_range
     }
-
     return render(request, 'uploader/list-submission.html', context)
 
 def submission_details_view(request, iri):
@@ -85,4 +109,20 @@ def submission_details_view(request, iri):
     context = { 'submission': submission }
 
     return render(request, 'uploader/view-submission.html', context)
+
+
+class SyncMetadataRDF(APIView):
+    """
+    Sync's metadata with triple store 
+    """
+
+    def post(self, request, col_id, format=None):
+        try:
+            res_uri = settings.ARVADOS_COL_BASE_URI + col_id + "/metadata.rdf"
+            g = Graph()
+            g.parse(res_uri)
+            insert(g)
+            return Response()
+        except Exception as e:
+            logger.exception("message")
 
