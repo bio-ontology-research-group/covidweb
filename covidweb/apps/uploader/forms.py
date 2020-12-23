@@ -172,7 +172,8 @@ class UploadForm(forms.ModelForm):
 
     def save(self):
         self.instance = super(UploadForm, self).save(commit=False)
-        self.instance.user = self.request.user
+        if self.request.user.is_authenticated:
+            self.instance.user = self.request.user
         if not self.instance.id:
             self.instance.save()
         sequence_file = self.save_file(self.cleaned_data['sequence_file'])
