@@ -72,7 +72,7 @@
 					<section class="docs-section" id="item-1-3">
 						<h2 class="section-heading">Metadata File Format</h2>
 						<p>The structure of the metadata file is described in <a class="theme-link" href="https://yaml.org/" target="_blank">YAML</a> 
-                        language. The schema file is available <a class="theme-link" href="https://github.com/bio-ontology-research-group/bh20-seq-resource/blob/master/bh20sequploader/bh20seq-schema.yml" target="_blank">here</a>.</p>
+                        language. The schema file is available <a class="theme-link" href="https://github.com/bio-ontology-research-group/cborguploader/blob/master/cborguploader/bh20seq-schema.yml" target="_blank">here</a>.</p>
                         <h5>Metadata file fields description:</h5>
 						<div class="table-responsive my-4">
 							<table class="table table-bordered">
@@ -279,7 +279,7 @@
                          Single RDF resource is compiled that is linked against external resources such as NCBITaxon, PATO, CHEBI and Wikidata. The generated RDF
                         file is hosted in any triple store and can be queried using SPARQL.</p>
                         <p>RDF resource structure is described in <a class="theme-link" href="https://www.w3.org/TR/shacl/" target="_blank">SHACL</a> 
-                        language and the schema file is available <a class="theme-link" href="https://github.com/bio-ontology-research-group/bh20-seq-resource/blob/master/bh20sequploader/bh20seq-shex.rdf" target="_blank">here</a>.</p>
+                        language and the schema file is available <a class="theme-link" href="https://github.com/bio-ontology-research-group/cborguploader/blob/master/cborguploader/bh20seq-shex.rdf" target="_blank">here</a>.</p>
                         <p>The uploader web interface provides an interactive SPARQL query editor and the example queries for querying submitted data such as query for listing 
                         all the submissions, listing submissions for SARS-COV-2 virus and details of a specific submission.</p>
 					</section><!--//section-->
@@ -298,7 +298,7 @@
 				    <header class="docs-header">
 					    <h1 class="docs-heading">Commandline tool</h1>
 					    <section class="docs-intro">
-						    <p>To get started, first install the uploader, and use the bh20-seq-uploader command to upload your data.</p>
+						    <p>To get started, first install the uploader, and use the cborguploader command to upload your data.</p>
 						</section><!--//docs-intro-->
 				    </header>
 				     <section class="docs-section" id="item-2-1">
@@ -319,13 +319,13 @@
 						<h5 class="pt-5">Install the tool</h5>
 						<p> Once in your virtualenv, install this project:</p>
                         <div class="docs-code-block">
-							<code class="shell">pip3 install git+https://github.com/bio-ontology-research-group/bh20-seq-resource.git@master</code>
+							<code class="shell">pip3 install git+https://github.com/bio-ontology-research-group/cborguploader@master</code>
                         </div>
 						<p> It should print some instructions about how to use the uploader.</p>
                         <h5 class="pt-5">Test the tool</h5>
 						<p>Try running:</p>
                         <div class="docs-code-block">
-							<code class="shell">bh20-seq-uploader --help</code>
+							<code class="shell">cborguploader --help</code>
                         </div>
                         <h5 class="pt-5">Set Arvados API Token</h5>
 						<p>Before uploading the sequence files, you need to set arvados api token value to environment variable ARVADOS_API_TOKEN. It will look something as the following:</p>
@@ -339,7 +339,7 @@
                         <h2 class="section-heading">Usage</h2>
                         <p>Run the uploader with a FASTA or FASTQ file and accompanying metadata file in JSON or YAML:</p>
                         <div class="docs-code-block">
-							<code class="shell">bh20-seq-uploader example/sequence.fasta example/metadata.yaml</code>
+							<code class="shell">cborguploader example/sequence.fasta example/metadata.yaml</code>
                         </div>
                         <p class="pt-2 pb-2">You can find the example files on COVID-19 <a class="theme-link" href="https://upload.cborg.cbrc.kaust.edu.sa/upload/" target="_blank">web uploader</a>. Here are the links to example files:</p>
                         <ul>
