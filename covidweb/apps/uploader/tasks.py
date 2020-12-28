@@ -23,6 +23,7 @@ def upload_to_arvados(project_uuid, upload_pk, sequence_file, sequence_file2, me
         cmd += ['--sequence-read1', sequence_file]
         if sequence_file2 and upload.is_paired:
             cmd += ['--sequence-read2', sequence_file2]
+    cmd.append('--no-sync')
     print(" ".join(cmd))
     result = subprocess.run(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

@@ -18,6 +18,13 @@ class UploadSerializer(serializers.ModelSerializer):
         except User.DoesNotExist:
             raise serializers.ValidationError('Invalid token!')    
         return token
+
+    def validate_col_uuid(self, col_uuid):
+        upload = Upload.objects.filter(col_uuid=col_uuid)
+        if upload.exists():
+            raise serializers.ValidationError('Upload already exists!')    
+        return col_uuid
+
     
     def save(self):
         token = self.validated_data.pop('token')
