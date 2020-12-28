@@ -295,3 +295,5 @@ GALAXY_API_BASEURL=config['galaxy']['api.base_url']
 GALAXY_API_KEY=config['galaxy']['api.key']
 GALAXY_PANGENOME_RESULT_DIR=config['galaxy']['pangenome_result_dir']
 LIBRARY_ID= config['galaxy']['api.library.id']
+
+UPLOADER_PROJECT_UUID = 'cborg-j7d0g-nyah4ques5ww7pk'

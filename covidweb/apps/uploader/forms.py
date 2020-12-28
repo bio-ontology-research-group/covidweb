@@ -10,6 +10,9 @@ import tempfile
 import json
 import datetime
 import os
+from django.conf import settings
+
+UPLOADER_PROJECT_UUID = getattr(settings, 'UPLOADER_PROJECT_UUID', 'cborg-j7d0g-nyah4ques5ww7pk')
 
 
 def add_clean_field(cls, field_name):
@@ -29,6 +32,9 @@ class UploadForm(forms.ModelForm):
     sequence_file = forms.FileField(
         required=True,
         help_text='Sequence file in FASTA/FASTQ format. Max file size is 512Mb.')
+    sequence_file2 = forms.FileField(
+        required=False,
+        help_text='Optional FASTQ format file for paired reads. Max file size is 512Mb.')
     metadata_file = forms.FileField(
         required=False,
         help_text='Metadata file in JSON/YAML format. Metadata fields are not required if this file is provided.')
@@ -93,7 +99,7 @@ class UploadForm(forms.ModelForm):
         return self['metadata.id']
     
     def file_fields(self):
-        return [self['sequence_file'], self['metadata_file']]
+        return [self['sequence_file'], self['sequence_file2'], self['metadata_file']]
 
     def host_fields(self):
         for name in self.fields:
@@ -131,10 +137,27 @@ class UploadForm(forms.ModelForm):
         sequence_file = self.cleaned_data['sequence_file']
         try:
             sf = open(sequence_file.temporary_file_path(), 'r')
-            qc_fasta(sf)
+            filename = qc_fasta(sf)
+            self.is_fasta = filename == 'sequence.fasta'
         except ValueError:
             raise ValidationError("Invalid file format")
         return sequence_file
+
+    def clean_sequence_file2(self):
+        sequence_file2 = self.cleaned_data['sequence_file2']
+        self.is_paired = False
+        if sequence_file2:
+            try:
+                sf = open(sequence_file2.temporary_file_path(), 'r')
+                filename = qc_fasta(sf)
+                if filename != 'reads.fastq':
+                    raise ValidationError('Invalid file format')
+                self.is_paired = True
+            except ValueError:
+                raise ValidationError("Invalid file format")
+            
+        return sequence_file2
+
 
     def clean(self):
         if not self.cleaned_data['metadata_file']:
@@ -160,6 +183,8 @@ class UploadForm(forms.ModelForm):
                 os.remove(f.name)
                 raise ValidationError("Invalid metadata format")
             self.cleaned_data['fields_metadata_file'] = f.name
+        if self.is_paired and self.is_fasta:
+            raise ValidationError("Both files need to be in FASTQ format. Provide only one FASTA file otherwise")
         return self.cleaned_data
     
 
@@ -172,18 +197,28 @@ class UploadForm(forms.ModelForm):
 
     def save(self):
         self.instance = super(UploadForm, self).save(commit=False)
+        self.instance.is_fasta = self.is_fasta
+        self.instance.is_paired = self.is_paired
         if self.request.user.is_authenticated:
             self.instance.user = self.request.user
         if not self.instance.id:
             self.instance.save()
         sequence_file = self.save_file(self.cleaned_data['sequence_file'])
+        sequence_file2 = self.cleaned_data['sequence_file2']
+        if sequence_file2:
+            sequence_file2 = self.save_file(sequence_file2)
         metadata_file = self.cleaned_data['metadata_file']
         if metadata_file:
             metadata_file = self.save_file(metadata_file)
         else:
             metadata_file = self.cleaned_data['fields_metadata_file']
+        project_uuid = UPLOADER_PROJECT_UUID
+        if self.request.user.userprofile.project_uuid:
+            project_uuid = self.request.user.userprofile.project_uuid
         upload_to_arvados.delay(
+            project_uuid,
             self.instance.id,
             sequence_file,
+            sequence_file2,
             metadata_file)
         return self.instance

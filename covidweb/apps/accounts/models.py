@@ -20,6 +20,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(
         User, primary_key=True, on_delete=models.CASCADE)
     organization = models.CharField(max_length=255)
+    token = models.CharField(max_length=127, blank=True, null=True, db_index=True)
+    project_uuid = models.CharField(max_length=31, blank=True, null=True)
 
 
 def create_user_profile(sender, instance, created, **kwargs):

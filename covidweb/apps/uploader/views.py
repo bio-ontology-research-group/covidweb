@@ -4,23 +4,19 @@ import logging
 from django.shortcuts import render
 from django.urls import reverse
 from django.core.paginator import InvalidPage, Paginator
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.conf import settings
 
 from uploader.submissions import Submissions
-
 from django.views.generic import CreateView, DetailView, ListView
 from uploader.forms import UploadForm
-from covidweb.mixins import FormRequestMixin
+from covidweb.mixins import FormRequestMixin, ActionMixin
 from covidweb.virtuoso import insert
 from uploader.models import Upload
 from uploader.utils import api
 from uploader.utils import fix_iri_path_param
-
-from rdflib import Graph
-
-from rest_framework.response import Response
-from rest_framework.views import APIView
+import arvados
+import arvados.collection
 
 
 logger = logging.getLogger(__name__)
@@ -41,9 +37,81 @@ class UploadCreateView(FormRequestMixin, CreateView):
         return reverse('uploader-view', kwargs={'pk': self.object.pk})
 
 
-class UploadDetailView(DetailView):
+class UploadDetailView(ActionMixin, DetailView):
     model = Upload
     template_name = 'uploader/view.html'
+
+    def get_success_url(self):
+        return reverse(
+            'uploader-view', kwargs={'pk': self.get_object().pk})
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.user_id != request.user.id:
+            raise Http404
+        return super(UploadDetailView, self).dispatch(request, *args, **kwargs)
+    
+    def on_download_fasta(self, request, action):
+        upload = self.get_object()
+        if upload.status != Upload.UPLOADED:
+            raise Http404
+        response = HttpResponse(content_type='text/fasta')
+        response['Content-Disposition'] = \
+            'attachment; filename="sequence.fasta"'
+        c = arvados.collection.CollectionReader(upload.col_uuid)
+        with c.open('sequence.fasta', "rb") as reader:
+            content = reader.read(128*1024)
+            while content:
+                response.write(content)
+                content = reader.read(128*1024)
+        return response
+
+    def on_download_fastq1(self, request, action):
+        upload = self.get_object()
+        if upload.status != Upload.UPLOADED:
+            raise Http404
+        response = HttpResponse(content_type='text/fastq')
+        response['Content-Disposition'] = \
+            'attachment; filename="reads1.fastq"'
+        c = arvados.collection.CollectionReader(upload.col_uuid)
+        with c.open('reads1.fastq', "rb") as reader:
+            content = reader.read(128*1024)
+            while content:
+                response.write(content)
+                content = reader.read(128*1024)
+        return response
+
+    def on_download_fastq2(self, request, action):
+        upload = self.get_object()
+        if upload.status != Upload.UPLOADED:
+            raise Http404
+        response = HttpResponse(content_type='text/fastq')
+        response['Content-Disposition'] = \
+            'attachment; filename="reads2.fastq"'
+        c = arvados.collection.CollectionReader(upload.col_uuid)
+        with c.open('reads2.fastq', "rb") as reader:
+            content = reader.read(128*1024)
+            while content:
+                response.write(content)
+                content = reader.read(128*1024)
+        return response
+
+
+    def on_download_metadata(self, request, action):
+        upload = self.get_object()
+        if upload.status != Upload.UPLOADED:
+            raise Http404
+        response = HttpResponse(content_type='application/json')
+        response['Content-Disposition'] = \
+            'attachment; filename="metadata.yaml"'
+        c = arvados.collection.CollectionReader(upload.col_uuid)
+        with c.open('metadata.yaml', "rb") as reader:
+            content = reader.read(128*1024)
+            while content:
+                response.write(content)
+                content = reader.read(128*1024)
+        return response
+
 
 class UploadListView(ListView):
     model = Upload
@@ -109,20 +177,3 @@ def submission_details_view(request, iri):
     context = { 'submission': submission }
 
     return render(request, 'uploader/view-submission.html', context)
-
-
-class SyncMetadataRDF(APIView):
-    """
-    Sync's metadata with triple store 
-    """
-
-    def post(self, request, col_id, format=None):
-        try:
-            res_uri = settings.ARVADOS_COL_BASE_URI + col_id + "/metadata.rdf"
-            g = Graph()
-            g.parse(res_uri)
-            insert(g)
-            return Response()
-        except Exception as e:
-            logger.exception("message")
-

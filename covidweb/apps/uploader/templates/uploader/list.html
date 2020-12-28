@@ -13,8 +13,7 @@
 	<tr>
 	  <td>{{ forloop.counter }}</td>
 	  <td>{{ object.name }}</td>
-	  <td><a href="{{ object.sequence_link }}">sequence</a></td>
-	  <td><a href="{{ object.metadata_link }}">metadata</a></td>
+	  <td><a href="{% url "uploader-view" object.pk %}">view</a></td>
 	</tr>
 	{% endfor %}
       </tbody>

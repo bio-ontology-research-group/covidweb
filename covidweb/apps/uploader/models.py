@@ -17,6 +17,8 @@ class Upload(models.Model):
         (ERROR, ERROR),
         (UPLOADED, UPLOADED)
     ]
+    is_fasta = models.BooleanField(default=True)
+    is_paired = models.BooleanField(default=False)
     user = models.ForeignKey(
         User, blank=True, null=True, on_delete=models.SET_NULL,
         related_name="uploads")
@@ -42,15 +44,25 @@ class Upload(models.Model):
         return self.collection['properties']['sequence_label']
 
     @property
+    def sequence_filename(self):
+        if self.is_fasta:
+            return 'sequence.fasta'
+        return 'reads.fastq'
+
+    @property
+    def metadata_filename(self):
+        return 'metadata.yaml'
+
+    @property
     def sequence_link(self):
         if not self.collection:
             return None
         portable_data_hash = self.collection['portable_data_hash']
-        return COLLECTIONS_URL + f'/c={portable_data_hash}/_/sequence.fasta'
+        return COLLECTIONS_URL + f'/c={portable_data_hash}/_/' + self.sequence_filename
 
     @property
     def metadata_link(self):
         if not self.collection:
             return None
         portable_data_hash = self.collection['portable_data_hash']
-        return COLLECTIONS_URL + f'/c={portable_data_hash}/_/metadata.yaml'
+        return COLLECTIONS_URL + f'/c={portable_data_hash}/_/' + self.metadata_filename

@@ -11,8 +11,18 @@ from .galaxy import create_folder, upload, clean_folder
 from django.conf import settings
 
 @task
-def upload_to_arvados(upload_pk, sequence_file, metadata_file):
-    cmd = ['bh20-seq-uploader', sequence_file, metadata_file]
+def upload_to_arvados(project_uuid, upload_pk, sequence_file, sequence_file2, metadata_file):
+    cmd = [
+        'cborguploader',
+        '--uploader-project', project_uuid,
+        '--metadata-file', metadata_file]
+    upload = Upload.objects.get(pk=upload_pk)
+    if upload.is_fasta:
+        cmd += ['--sequence-fasta', sequence_file]
+    else:
+        cmd += ['--sequence-read1', sequence_file]
+        if sequence_file2 and upload.is_paired:
+            cmd += ['--sequence-read2', sequence_file2]
     print(" ".join(cmd))
     result = subprocess.run(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -30,6 +40,8 @@ def upload_to_arvados(upload_pk, sequence_file, metadata_file):
         
     os.remove(sequence_file)
     os.remove(metadata_file)
+    if sequence_file2:
+        os.remove(sequence_file2)
 
 # Every 12th hour
 @periodic_task(run_every=crontab(minute=0, hour='11,23'))
