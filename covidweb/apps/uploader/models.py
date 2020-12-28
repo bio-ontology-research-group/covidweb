@@ -66,3 +66,9 @@ class Upload(models.Model):
             return None
         portable_data_hash = self.collection['portable_data_hash']
         return COLLECTIONS_URL + f'/c={portable_data_hash}/_/' + self.metadata_filename
+
+    @property
+    def token(self):
+        if self.user:
+            return self.user.userprofile.token
+        return None

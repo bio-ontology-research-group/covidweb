@@ -1,9 +1,14 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework.generics import CreateAPIView
+from rest_framework import status
+from uploader.serializers import UploadSerializer
 from rdflib import Graph
 
+class SyncUpload(CreateAPIView):
 
+    serializer_class = UploadSerializer
+    
 class SyncMetadataRDF(APIView):
     """
     Sync's metadata with triple store 
