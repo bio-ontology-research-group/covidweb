@@ -243,6 +243,8 @@ SOCIALACCOUNT_PROVIDERS = {
         'MEMBER_API': False,  # for the member API
     }
 }
+SOCIALACCOUNT_AUTO_SIGNUP = True
+ACCOUNT_ADAPTER = 'accounts.adapter.NoNewUsersAccountAdapter'
 
 MESSAGE_TAGS = {
     messages.INFO: 'list-group-item-info',
