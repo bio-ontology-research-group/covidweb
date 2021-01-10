@@ -88,6 +88,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
+CSRF_COOKIE_HTTPONLY = True
 
 ROOT_URLCONF = 'covidweb.urls'
 
