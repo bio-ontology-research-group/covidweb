@@ -9,10 +9,9 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="{% static "images/logo.png" %}">
 
-    <title>CBRC/BORG COVID-19 Sequence Database</title>
-
+    <title> Uploader </title>
+    <link rel="stylesheet" href="{% static "assets/css/style.css" %}">
     <!-- CSS -->
     <link href="{% static "yarn/bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
     <link href="{% static "yarn/jquery-ui-dist/jquery-ui.min.css" %}" rel="stylesheet">
@@ -20,9 +19,8 @@
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
     <!-- Custom styles for this template -->
-    <link href="{% static "css/styles.css" %}" rel="stylesheet">
-    <link href="{% static "css/doc-theme.css" %}" rel="stylesheet">
-
+    <link href="{% static "assets/css/styles.css" %}" rel="stylesheet">
+    
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
 
@@ -39,18 +37,28 @@
     {% block navigation %}
       {% include "header.html" %}
     {% endblock %}
+    <div class="container">
     {% block content %}
     {% endblock %}
+    </div>
     {% block footer %}
-    <footer class="footer bg-light">
-      <div class="container">
-	<div class="row">
-          <div class="col-lg-6 h-100 text-center text-lg-left my-auto">
-            <p class="text-muted small mb-4 mb-lg-0">© BORG 2020. All Rights Reserved.</p>
+    <footer class="footer">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="footer-about">
+
+            <img class="footer-logo" alt="Weqaya" src="{% static "assets/images/footer-logo.png" %}">
+
+            <p class="text">
+              <br />
+              70 SCDC Building, Al Aarid, King Abdulaziz Rd, Riyadh 13354, Saudi Arabia <br />
+              <a href="tel:+966 11 2528357"> +966 11 2528357 </a> <br />
+              <a href="mailto:NCDC-Media@moh.gov.sa"> NCDC-Media@moh.gov.sa </a> <br />
+              2021 © All Rights Reserved <br />
+            </p>
+
           </div>
-          <div class="col-lg-6 h-100 text-center text-lg-right my-auto">
-          </div>
-	</div>
+        </div>
       </div>
     </footer>
     {% endblock %}

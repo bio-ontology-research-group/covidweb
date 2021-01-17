@@ -10,11 +10,13 @@
       </thead>
       <tbody>
 	{% for object in object_list %}
+        {% if object.collection %}
 	<tr>
 	  <td>{{ forloop.counter }}</td>
 	  <td>{{ object.name }}</td>
 	  <td><a href="{% url "uploader-view" object.pk %}">view</a></td>
 	</tr>
+        {% endif %}
 	{% endfor %}
       </tbody>
     </table>

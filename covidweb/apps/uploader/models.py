@@ -34,8 +34,12 @@ class Upload(models.Model):
             return None
         if hasattr(self, '_col'):
             return self._col
-        self._col = api.collections().get(uuid=self.col_uuid).execute()
-        return self._col
+        try:
+            self._col = api.collections().get(uuid=self.col_uuid).execute()
+            return self._col
+        except Exception:
+            pass
+        return None
 
     @property
     def name(self):
@@ -54,21 +58,8 @@ class Upload(models.Model):
         return 'metadata.yaml'
 
     @property
-    def sequence_link(self):
-        if not self.collection:
-            return None
-        portable_data_hash = self.collection['portable_data_hash']
-        return COLLECTIONS_URL + f'/c={portable_data_hash}/_/' + self.sequence_filename
-
-    @property
-    def metadata_link(self):
-        if not self.collection:
-            return None
-        portable_data_hash = self.collection['portable_data_hash']
-        return COLLECTIONS_URL + f'/c={portable_data_hash}/_/' + self.metadata_filename
-
-    @property
     def token(self):
         if self.user:
             return self.user.userprofile.token
         return None
+    
