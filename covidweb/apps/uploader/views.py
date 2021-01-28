@@ -4,7 +4,7 @@ import logging
 from django.shortcuts import render
 from django.urls import reverse
 from django.core.paginator import InvalidPage, Paginator
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.conf import settings
 
 from uploader.submissions import Submissions
@@ -111,6 +111,14 @@ class UploadDetailView(ActionMixin, DetailView):
                 response.write(content)
                 content = reader.read(128*1024)
         return response
+
+    def on_delete(self, request, action):
+        upload = self.get_object()
+        if upload.status != Upload.UPLOADED:
+            raise Http404
+        api.collections().delete(uuid=upload.col_uuid).execute()
+        upload.delete()
+        return HttpResponseRedirect(reverse('uploader-list'))
 
 
 class UploadListView(ListView):

@@ -53,6 +53,13 @@
       </li>
       {% endif %}
       {% endif %}
+      <li class="list-group-item">
+        <form method="post" action="{% url "uploader-view" object.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="delete"/>
+          <button class="btn btn-warning" onclick="return confirm('Are you sure you want to delete the upload?')" type="submit">Delete</button>
+        </form>
+      </li>
     </ul>
     {% endif %}
   </div>
