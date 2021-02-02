@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.orcid',
+    'allauth.socialaccount.providers.keycloak',
     'widget_tweaks',
     'rest_framework',
     'corsheaders',
@@ -242,6 +243,10 @@ SOCIALACCOUNT_PROVIDERS = {
         'BASE_DOMAIN':'orcid.org',  # for the sandbox API
         # Member API or Public API? Default: False (for the public API)
         'MEMBER_API': False,  # for the member API
+    },
+    'keycloak': {
+        'KEYCLOAK_URL': 'https://nbs.cdc.gov.sa/auth',
+        'KEYCLOAK_REALM': 'GID'
     }
 }
 SOCIALACCOUNT_AUTO_SIGNUP = True
