@@ -67,7 +67,6 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.orcid',
     'allauth.socialaccount.providers.keycloak',
     'widget_tweaks',
     'rest_framework',
@@ -238,14 +237,14 @@ ACCOUNT_FORMS = {
     'login': 'accounts.forms.CaptchaLoginForm',
     'signup': 'accounts.forms.CaptchaSignupForm'}
 SOCIALACCOUNT_PROVIDERS = {
-    'orcid': {
-        # Base domain of the API. Default value: 'orcid.org', for the production API
-        'BASE_DOMAIN':'orcid.org',  # for the sandbox API
-        # Member API or Public API? Default: False (for the public API)
-        'MEMBER_API': False,  # for the member API
-    },
+    # 'orcid': {
+    #     # Base domain of the API. Default value: 'orcid.org', for the production API
+    #     'BASE_DOMAIN':'orcid.org',  # for the sandbox API
+    #     # Member API or Public API? Default: False (for the public API)
+    #     'MEMBER_API': False,  # for the member API
+    # },
     'keycloak': {
-        'KEYCLOAK_URL': 'https://nbs.cdc.gov.sa/auth',
+        'KEYCLOAK_URL': 'https://auth.cdc.gov.sa/auth',
         'KEYCLOAK_REALM': 'GID'
     }
 }
